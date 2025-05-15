@@ -1,9 +1,10 @@
-Microservice Stack Deployment with Kustomize for Minikube
+# Microservice Stack Deployment with Kustomize for Minikube
 
 This repository contains a Kubernetes deployment of a simple three-service microservice architecture using Kustomize. It is designed to run on Minikube and demonstrates namespace separation, resource management, health checks, and ingress.
 
-Directory Structure
+## Directory Structure
 
+```
 microservice-stack/
 ├── base/
 │   ├── namespaces/
@@ -25,71 +26,86 @@ microservice-stack/
 │   │   └── service.yaml             # ClusterIP service for data-service
 │   └── kustomization.yaml           # Aggregates all base resources
 └── kustomization.yaml               # Root Kustomization including base
+```
 
-Components
+## Components
 
-Namespaces
+* **Namespaces**
 
-system for internal services (auth, data).
+  * `system` for internal services (auth, data).
+  * `application` for the public-facing gateway.
 
-application for the public-facing gateway.
+* **Gateway**
 
-Gateway
+  * Uses an NGINX demo image to serve incoming HTTP requests.
+  * Exposed via a Kubernetes Ingress.
+  * Configured with liveness and readiness probes, and resource requests/limits.
 
-Uses an NGINX demo image to serve incoming HTTP requests.
+* **Auth Service**
 
-Exposed via a Kubernetes Ingress.
+  * Uses the `kennethreitz/httpbin` image to simulate an authentication endpoint.
+  * Internal-only (ClusterIP) in the `system` namespace.
+  * Health checks ensure reliability.
 
-Configured with liveness and readiness probes, and resource requests/limits.
+* **Data Service**
 
-Auth Service
+  * Uses `hashicorp/http-echo` to return a simple text response.
+  * Internal-only (ClusterIP) in the `system` namespace.
+  * Health checks and resource management similar to other services.
 
-Uses the kennethreitz/httpbin image to simulate an authentication endpoint.
+## How to Deploy on Minikube
 
-Internal-only (ClusterIP) in the system namespace.
+1. **Start Minikube**
 
-Health checks ensure reliability.
+   ```bash
+   minikube start
+   ```
 
-Data Service
+2. **Enable Ingress Add-on**
 
-Uses hashicorp/http-echo to return a simple text response.
+   ```bash
+   minikube addons enable ingress
+   ```
 
-Internal-only (ClusterIP) in the system namespace.
+3. **Deploy the Stack**
 
-Health checks and resource management similar to other services.
+   ```bash
+   kubectl apply -k ./
+   ```
 
-How to Deploy on Minikube
+4. **Verify Resources**
 
-Start Minikube
+   ```bash
+   # Namespaces
+   kubectl get ns
 
-minikube start
+   # Deployments
+   kubectl get deployments -n application
+   kubectl get deployments -n system
 
-Enable Ingress Add-on
+   # Services
+   kubectl get svc -n application
+   kubectl get svc -n system
 
-minikube addons enable ingress
+   # Ingress
+   kubectl get ingress -n application
+   ```
 
-Deploy the Stack
+5. **Access the Gateway**
 
-kubectl apply -k ./
+   ```bash
+   minikube ip
+   ```
 
-Verify Resources
+   Open your browser to `http://<MINIKUBE_IP>/` to see the gateway response.
 
-# Namespaces
-kubectl get ns
+## Notes
 
-# Deployments
-kubectl get deployments -n application
-kubectl get deployments -n system
+* Services in different namespaces communicate via DNS, e.g., `auth-service.system.svc.cluster.local`.
+* Only the gateway is exposed externally; internal services use `ClusterIP`.
+* Resource requests/limits prevent any one container from starving others.
+* Health probes (liveness/readiness) ensure pods are healthy before receiving traffic.
 
-# Services
-kubectl get svc -n application
-kubectl get svc -n system
+---
 
-# Ingress
-kubectl get ingress -n application
-
-Access the Gateway
-
-minikube ip
-
-Open your browser to http://<MINIKUBE_IP>/ to see the gateway response.
+Feel free to customize replicas, images, or resource settings to suit your needs.
