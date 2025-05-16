@@ -61,9 +61,9 @@ This Job will:
 - Create a MinIO user: data-service-user
 - Attach a scoped IAM-like policy to allow access to that user only
 
-### 6. Run Access Tests
+### 5. Run Access Tests
 ```bash
-kubectl apply -f 06-access-test-jobs.yaml
+kubectl apply -f 05-access-test-jobs.yaml
 ```
 Tests:
 ✅ test-data-service-access: Uploads and lists objects in the bucket
