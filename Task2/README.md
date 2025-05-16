@@ -17,10 +17,10 @@ This project simulates AWS IAM-style access control within a Kubernetes environm
 
 ## 🚀 Setup Instructions
 
-### 1. Create Namespaces & Secrets
+### 1. Create Namespaces, Secrets and minio
 
 ```bash
-kubectl apply -f 01-namespaces-and-secrets.yaml
+kubectl apply -f 01-minio-deployment.yaml
 ```
 
 Includes:
@@ -28,40 +28,33 @@ Includes:
 - app-system namespace for workloads
 - Root credentials for MinIO
 - Access credentials for data-service
-
-### 2. Deploy MinIO
-```bash
-kubectl apply -f 02-minio-deployment.yaml
-```
-
-Includes:
 - Deployment with persistent volume
 - Exposes API (port 9000) and Console (port 9001)
 
 
-### 3. Create ServiceAccounts
+### 2. Create ServiceAccounts
 
 ```bash
-kubectl apply -f 03-service-accounts.yaml
+kubectl apply -f 02-service-accounts.yaml
 ```
 
 Includes:
 - data-service-sa
 - auth-service-sa
 
-### 4. Deploy Workloads
+### 3. Deploy Workloads
 
 ```bash
-kubectl apply -f 04-services-deployment.yaml
+kubectl apply -f 03-services-deployment.yaml
 ```
 Includes:
 - data-service: Configured with valid MinIO credentials
 - auth-service: Lacks access permissions
 
-### 5. Configure MinIO Policies & Bucket
+### 4. Configure MinIO Policies & Bucket
 
 ```bash
-kubectl apply -f 05-minio-setup-job.yaml
+kubectl apply -f 04-minio-setup-job.yaml
 ```
 This Job will:
 - Create the app-data bucket
