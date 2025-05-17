@@ -31,16 +31,11 @@ This deployment implements IAM-like access control at two levels:
 main/
 ├── base/
 │   ├── kustomization.yaml
-│   ├── namespaces/
-│   │   ├── kustomization.yaml
-│   │   ├── app-namespace.yaml
-│   │   └── system-namespace.yaml
-|   |   └── minio-secret-app-namespace.yaml
-│   └── rbac/
+│   └── namespaces/
 │       ├── kustomization.yaml
-│       ├── data-service-sa.yaml
-│       ├── data-service-role.yaml
-│       └── data-service-role-binding.yaml
+│       ├── app-namespace.yaml
+│       └── system-namespace.yaml
+|       └── minio-secret-app-namespace.yaml
 ├── overlays/
 │   └── dev/
 │       ├── kustomization.yaml
@@ -53,6 +48,7 @@ main/
 │       │   ├── kustomization.yaml
 │       │   ├── deployment.yaml
 │       │   └── service.yaml
+|       |   └── minio-secret-app-namespace.yaml
 │       ├── data-service/
 │       │   ├── kustomization.yaml
 │       │   ├── deployment.yaml
