@@ -43,7 +43,7 @@ spec:
           mc admin policy create myminio data-service-policy /tmp/data-service-policy.json || echo "Policy already exists"
          
           # Apply policy to data-service user
-          mc admin policy attach myminio data-service-policy user="$DATA_SERVICE_USER"
+          mc admin policy attach myminio data-service-policy --user="$DATA_SERVICE_USER"
          
           echo "MinIO setup completed"
         env:
