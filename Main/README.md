@@ -35,6 +35,7 @@ main/
 │   │   ├── kustomization.yaml
 │   │   ├── app-namespace.yaml
 │   │   └── system-namespace.yaml
+|   |   └── minio-secret-app-namespace.yaml
 │   └── rbac/
 │       ├── kustomization.yaml
 │       ├── data-service-sa.yaml
@@ -60,7 +61,7 @@ main/
 │           ├── kustomization.yaml
 │           ├── deployment.yaml
 │           ├── service.yaml
-│           └── secret.yaml
+│           └── minio-secret-system-namespace.yaml
 └── README.md
 ```
 

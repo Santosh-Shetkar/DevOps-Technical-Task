@@ -7,7 +7,6 @@ namespace: system-namespace
 resources:
 - deployment.yaml
 - service.yaml
-- minio-secret-app-namespace.yaml
 - minio-secret-system-namespace.yaml
 - data-service-minio-secret.yaml
 - minio-setup-job.yaml
