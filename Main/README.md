@@ -77,11 +77,8 @@ kubectl get jobs -n system-namespace
 ### Verify that data-service can access MinIO
 ```bash
 # Use a temporary pod with data-service SA to test access
-kubectl run minio-test-data --image=minio/mc --overrides='{"spec":{"serviceAccountName":"data-service-sa"}}' -n app-namespace --rm -it -- bash
+kubectl run minio-test-data --image=minio/mc -n app-namespace --rm -it -- bash
 
-# Inside the pod, test access with data-service credentials
-export MINIO_ACCESS_KEY=$(kubectl get secret data-service-minio-creds -n system-namespace -o jsonpath='{.data.accesskey}' | base64 --decode)
-export MINIO_SECRET_KEY=$(kubectl get secret data-service-minio-creds -n system-namespace -o jsonpath='{.data.secretkey}' | base64 --decode)
 
 mc alias set myminio http://minio.system-namespace.svc.cluster.local:9000 $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
 mc ls myminio/app-data  # This should succeed

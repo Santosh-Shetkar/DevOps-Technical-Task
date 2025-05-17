@@ -13,7 +13,6 @@ spec:
       labels:
         app: data-service
     spec:
-      serviceAccountName: data-service-sa
       containers:
       - name: data-service
         image: hashicorp/http-echo
