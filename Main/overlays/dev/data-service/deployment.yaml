@@ -4,7 +4,7 @@ metadata:
   name: data-service
   namespace: app-namespace
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: data-service
@@ -32,17 +32,19 @@ spec:
         - name: MINIO_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: minio-credentials
+              name: data-service-minio-creds
               key: accesskey
               optional: false
         - name: MINIO_SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: minio-credentials
+              name: data-service-minio-creds
               key: secretkey
               optional: false
         - name: MINIO_ENDPOINT
-          value: "minio.system-namespace.svc.cluster.local"
+          value: "minio.system-namespace.svc.cluster.local:9000"
+        - name: MINIO_BUCKET_NAME
+          value: "app-data"
         livenessProbe:
           httpGet:
             path: /

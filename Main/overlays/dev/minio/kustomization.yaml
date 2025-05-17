@@ -8,3 +8,5 @@ resources:
 - deployment.yaml
 - service.yaml
 - secret.yaml
+- data-service-minio-secret.yaml
+- minio-setup-job.yaml

@@ -9,5 +9,5 @@ rules:
   verbs: ["get", "list"]
 - apiGroups: [""]
   resources: ["secrets"]
-  resourceNames: ["minio-credentials"]
+  resourceNames: ["data-service-minio-creds"]
   verbs: ["get"]
