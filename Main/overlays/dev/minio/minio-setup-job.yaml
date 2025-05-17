@@ -13,6 +13,7 @@ spec:
         args:
         - |
           # Configure MinIO client
+          
           mc alias set myminio http://minio:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
          
           # Wait for MinIO to be ready
@@ -39,10 +40,10 @@ spec:
             ]
           }' > /tmp/data-service-policy.json
          
-          mc admin policy add myminio data-service-policy /tmp/data-service-policy.json || echo "Policy already exists"
+          mc admin policy create myminio data-service-policy /tmp/data-service-policy.json || echo "Policy already exists"
          
           # Apply policy to data-service user
-          mc admin policy set myminio data-service-policy user="$DATA_SERVICE_USER"
+          mc admin policy attach myminio data-service-policy user="$DATA_SERVICE_USER"
          
           echo "MinIO setup completed"
         env:
