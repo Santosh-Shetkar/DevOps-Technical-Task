@@ -1,0 +1,8 @@
+# RBAC kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- data-service-sa.yaml
+- data-service-role.yaml
+- data-service-role-binding.yaml

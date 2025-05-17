@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-service
+  namespace: app-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-service
+  template:
+    metadata:
+      labels:
+        app: data-service
+    spec:
+      serviceAccountName: data-service-sa
+      containers:
+      - name: data-service
+        image: hashicorp/http-echo
+        args:
+        - "-text=data-service ready"
+        ports:
+        - containerPort: 5678
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        env:
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: data-service-minio-creds
+              key: accesskey
+              optional: false
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: data-service-minio-creds
+              key: secretkey
+              optional: false
+        - name: MINIO_ENDPOINT
+          value: "minio.system-namespace.svc.cluster.local:9000"
+        - name: MINIO_BUCKET_NAME
+          value: "app-data"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5678
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5678
+          initialDelaySeconds: 5
+          periodSeconds: 5
