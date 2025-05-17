@@ -124,3 +124,7 @@ task1/
 ---
 
 Feel free to customize replicas, images, or resource settings to suit your needs.
+
+### Link to the Loom video for this task: 
+
+https://www.loom.com/share/513ef1ba1a9d4724a6025463d9274c95?sid=21fd5328-e1f0-41fb-8c36-5795990ac1c5
