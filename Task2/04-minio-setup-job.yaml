@@ -11,16 +11,15 @@ spec:
         image: minio/mc:latest
         command: ["/bin/sh", "-c"]
         args:
-        - |
-          # Configure MinIO client
-          mc alias set myminio http://minio:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
-          
+        - |         
           # Create a bucket
-          mc mb myminio/app-data
-          
-          # Create user for data-service
-          mc admin user add myminio data-service-user "$DATA_SERVICE_PASSWORD"
-          
+          mc mb --ignore-existing myminio/app-data
+         
+          # Create user for data-service and auth-service
+          mc admin user add myminio "$DATA_SERVICE_USER" "$DATA_SERVICE_PASSWORD" || echo "User already exists"
+          mc admin user add myminio "$AUTH_SERVICE_USER" "$AUTH_SERVICE_PASSWORD" || echo "User already exists"
+
+
           # Create policy for data-service
           echo '{
             "Version": "2012-10-17",
@@ -28,16 +27,38 @@ spec:
               {
                 "Effect": "Allow",
                 "Action": ["s3:*"],
-                "Resource": ["arn:aws:s3:::app-data/*"]
+                "Resource": ["arn:aws:s3:::app-data", "arn:aws:s3:::app-data/*"]
               }
             ]
           }' > /tmp/data-service-policy.json
+         
+          #create access policy for data service user
+          mc admin policy create myminio data-service-policy /tmp/data-service-policy.json || echo "Policy already exists"
+
+
+          # Create policy for auth-service
+          echo '{
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Deny",
+                "Action": ["s3:*"],
+                "Resource": ["arn:aws:s3:::*"]
+              }
+            ]
+          }' > /tmp/auth-service-policy.json
           
-          mc admin policy add myminio data-service-policy /tmp/data-service-policy.json
-          
+          #create access policy for auth service user
+          mc admin policy create myminio auth-service-policy /tmp/auth-service-policy.json || echo "Policy already exists"
+
+
+
           # Apply policy to data-service user
-          mc admin policy set myminio data-service-policy user=data-service-user
-          
+          mc admin policy attach myminio data-service-policy --user="$DATA_SERVICE_USER"
+
+          # Apply policy to auth-service user
+          mc admin policy attach myminio auth-service-policy --user="$AUTH_SERVICE_USER"
+         
           echo "MinIO setup completed"
         env:
         - name: MINIO_ROOT_USER
@@ -50,9 +71,24 @@ spec:
             secretKeyRef:
               name: minio-credentials
               key: secretkey
+        - name: DATA_SERVICE_USER
+          valueFrom:
+            secretKeyRef:
+              name: data-service-minio-creds
+              key: accesskey
         - name: DATA_SERVICE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: data-service-minio-creds
               key: secretkey
+        - name: AUTH_SERVICE_USER
+          valueFrom:
+            secretKeyRef:
+              name: auth-service-minio-creds
+              key: accesskey
+        - name: AUTH_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auth-service-minio-creds
+              key: secretkey        
       restartPolicy: OnFailure

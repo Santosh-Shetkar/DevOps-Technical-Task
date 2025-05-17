@@ -6,7 +6,6 @@ metadata:
 spec:
   template:
     spec:
-      serviceAccountName: data-service-sa
       containers:
       - name: test-access
         image: minio/mc:latest
@@ -49,7 +48,6 @@ metadata:
 spec:
   template:
     spec:
-      serviceAccountName: auth-service-sa
       containers:
       - name: test-access
         image: minio/mc:latest
@@ -67,12 +65,12 @@ spec:
         - name: MINIO_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: data-service-minio-creds
+              name: auth-service-minio-creds
               key: accesskey
         - name: MINIO_SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: data-service-minio-creds
+              name: auth-service-minio-creds
               key: secretkey
         - name: MINIO_ENDPOINT
           value: "http://minio.storage-system:9000"
