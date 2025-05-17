@@ -81,11 +81,22 @@ spec:
     metadata:
       labels:
         app: auth-service
+      annotations:
+        fluentbit.io/exclude: "true"  # Exclude sensitive logs from being collected
     spec:
-      serviceAccountName: auth-service-sa
       containers:
       - name: auth-service
         image: kennethreitz/httpbin
+        env:
+        - name: HTTPBIN_SUPPRESS_LOGGING
+          value: "true"  # Custom env var to indicate logging should be limited
+        - name: HTTPBIN_STRIP_HEADERS
+          value: "Authorization,Cookie,X-API-Key"  # Headers to strip from logs
+        command: ["/bin/sh", "-c"]
+        arguments:
+        - |
+          # Override the entrypoint to route logs through a filter
+          exec gunicorn -b 0.0.0.0:80 httpbin:app 2>&1 | grep -v "Authorization\|Bearer\|api-key\|password\|secret"
         ports:
         - containerPort: 80
         resources:
