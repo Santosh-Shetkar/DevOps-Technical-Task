@@ -1,0 +1,64 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kubernetes-health-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring  # Make sure this matches your Prometheus release name
+spec:
+  groups:
+  - name: kubernetes-health
+    rules:
+    - alert: PodRestartFrequent
+      expr: increase(kube_pod_container_status_restarts_total[1h]) > 3
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Pod {{ $labels.pod }} is restarting frequently"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has restarted more than 3 times in the last hour"
+        
+    - alert: PodRepeatedlyFailing
+      expr: increase(kube_pod_container_status_restarts_total[15m]) > 2
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Pod {{ $labels.pod }} is failing repeatedly"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting frequently (more than 2 restarts in 15 minutes)"
+        
+    - alert: PodLivenessProbeFailure
+      expr: kube_pod_container_status_ready{condition="false"} == 1 and kube_pod_container_status_terminated{reason="Completed"} != 1
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Pod {{ $labels.pod }} is failing liveness probe"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is not ready for more than 10 minutes"
+        
+    - alert: PodReadinessProbeFailure
+      expr: kube_pod_container_status_ready{condition="false"} == 1 and kube_pod_container_status_terminated{reason="Completed"} != 1
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Pod {{ $labels.pod }} is failing readiness probe"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is not passing readiness checks for more than 15 minutes"
+        
+    - alert: HighCPUUsage
+      expr: sum(rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[5m])) by (pod, namespace) / sum(kube_pod_container_resource_limits_cpu_cores) by (pod, namespace) > 0.8
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Pod {{ $labels.pod }} high CPU usage"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using more than 80% of its CPU limit for more than 10 minutes"
+        
+    - alert: HighMemoryUsage
+      expr: sum(container_memory_working_set_bytes{container!="POD",container!=""}) by (pod, namespace) / sum(kube_pod_container_resource_limits_memory_bytes) by (pod, namespace) > 0.8
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Pod {{ $labels.pod }} high memory usage"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using more than 80% of its memory limit for more than 10 minutes"
