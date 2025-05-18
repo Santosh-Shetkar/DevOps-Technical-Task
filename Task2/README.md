@@ -114,5 +114,60 @@ Check bucket, users and policies
 
 ### 8 Deploy monitoring and Create dashboards
 
+#### Architecture Overview
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Applications  │    │   Prometheus    │    │    Grafana      │
+│                 │────│                 │────│                 │
+│ • data-service  │    │ • Metrics       │    │ • Dashboards    │
+│ • auth-service  │    │ • Alerting      │    │ • Visualizations│
+│ • gateway       │    │ • Storage       │    │ • Users         │
+│ • minio         │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+        │                        │                        │
+        └────────────────────────┼────────────────────────┘
+                                │
+                    ┌─────────────────┐
+                    │ ServiceMonitors │
+                    │                 │
+                    │ • Auto-discovery│
+                    │ • Target config │
+                    └─────────────────┘
+
+Note: Follow monitoring.sh file to deploy monitoring
+
+📊 Dashboard Configuration
+Import Pre-built Dashboard
+
+Open Grafana (http://localhost:3000)
+Login with admin credentials
+Click "+" → "Import"
+Paste the dashboard JSON from grafana-dashboard.json
+Click "Load" → "Import"
+
+Dashboard Features
+The included dashboard provides:
+
+CPU Usage: Real-time CPU consumption per pod
+Memory Usage: Memory utilization across services
+Pod Restarts: Color-coded restart counts with thresholds
+Pod Status: Current status of all monitored pods
+
+Key Metrics Monitored
+|     Metric    |        Description       |                       Query Example                       |
+|:-------------:|:------------------------:|:---------------------------------------------------------:|
+| CPU Usage     | CPU cores used per pod   | sum(rate(container_cpu_usage_seconds_total[5m])) by (pod) |
+| Memory Usage  | Working set memory in MB | container_memory_working_set_bytes / 1024 / 1024          |
+| Pod Restarts  | Container restart count  | kube_pod_container_status_restarts_total                  |
+| HTTP Errors   | 4xx/5xx error rate       | `rate(http_requests_total{code=~"4..                      |
+
+🎨 Creating Custom Panels
+Method 1: Using Grafana UI
+
+1. Create Panel: Dashboard → "Add panel" → "Add a new panel"
+2. Choose Visualization: Graph, Stat, Table, Gauge, etc.
+3. Configure Query: Select Prometheus data source and enter PromQL
+4. Customize: Set axes, colors, thresholds, legends
+5. Save: Click "Apply" then save dashboard
+
 
 ### Link to the Loom video for this task: 

@@ -38,10 +38,14 @@ kubectl apply -f minio-servicemonitor.yaml
 #Step 5: Custom Grafana Dashboard Configuration
 Create a custom dashboard with the following JSON configuration. Import this into Grafana:
 
-Go to Grafana UI (http://localhost:3000)
-Click on "+" → "Import"
-Paste the JSON configuration below
-Click "Load" and then "Import"
+📊 Dashboard Configuration
+Import Pre-built Dashboard
+
+Open Grafana (http://localhost:3000)
+Login with admin credentials
+Click "+" → "Import"
+Paste the dashboard JSON from grafana-dashboard.json
+Click "Load" → "Import"
 
 #Test Queries in Prometheus
 
