@@ -100,6 +100,19 @@ spec:
           exec gunicorn -b 0.0.0.0:80 httpbin:app 2>&1 | grep -v "Authorization\|Bearer\|api-key\|password\|secret"
         ports:
         - containerPort: 80
+        env:
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auth-service-minio-creds
+              key: accesskey
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auth-service-minio-creds
+              key: secretkey
+        - name: MINIO_ENDPOINT
+          value: "http://minio.storage-system:9000"
         resources:
           requests:
             memory: "64Mi"
@@ -132,3 +145,76 @@ spec:
   - port: 80
     targetPort: 80
   type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: app-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+      - name: gateway
+        image: nginxdemos/hello
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: app-system
+spec:
+  selector:
+    app: gateway
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gateway-ingress
+  namespace: app-system
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gateway
+            port:
+              number: 80
