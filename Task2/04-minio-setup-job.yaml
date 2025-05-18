@@ -12,7 +12,7 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
         - |
-          mc alias set myminio http://minio:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
+          mc alias set myminio http://minio.storage-system.svc.cluster.local:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
          
           # Wait for MinIO to be ready
           echo "Waiting for MinIO to be ready..."
@@ -25,7 +25,7 @@ spec:
          
           echo "AUTH USER=$$AUTH_SERVICE_USER"
           echo "AUTH PASS=$AUTH_SERVICE_PASSWORD"
-          
+
           # Create user for data-service and auth-service
           mc admin user add myminio "$DATA_SERVICE_USER" "$DATA_SERVICE_PASSWORD" || echo "User already exists"
 
