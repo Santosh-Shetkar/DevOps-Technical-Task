@@ -115,23 +115,7 @@ Check bucket, users and policies
 ### 8 Deploy monitoring and Create dashboards
 
 #### Architecture Overview
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Applications  │    │   Prometheus    │    │    Grafana      │
-│                 │────│                 │────│                 │
-│ • data-service  │    │ • Metrics       │    │ • Dashboards    │
-│ • auth-service  │    │ • Alerting      │    │ • Visualizations│
-│ • gateway       │    │ • Storage       │    │ • Users         │
-│ • minio         │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-        │                        │                        │
-        └────────────────────────┼────────────────────────┘
-                                │
-                    ┌─────────────────┐
-                    │ ServiceMonitors │
-                    │                 │
-                    │ • Auto-discovery│
-                    │ • Target config │
-                    └─────────────────┘
+<pre> ``` +------------------+ +------------------+ +------------------+ | Applications | | Prometheus | | Grafana | |------------------| |------------------| |------------------| | • data-service | | • Metrics | | • Dashboards | | • auth-service | | • Alerting | | • Visualizations | | • gateway | | • Storage | | • Users | | • minio | | | | | +------------------+ +------------------+ +------------------+ | | | +----------+-----------+-----------+----------+ | +------------------------+ | ServiceMonitors | |------------------------| | • Auto-discovery | | • Target config | +------------------------+ ``` </pre>
 
 Note: Follow monitoring.sh file to deploy monitoring
 
