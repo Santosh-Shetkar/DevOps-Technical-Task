@@ -23,6 +23,9 @@ spec:
           # Create a bucket
           mc mb --ignore-existing myminio/app-data
          
+          echo "AUTH USER=$$AUTH_SERVICE_USER"
+          echo "AUTH PASS=$AUTH_SERVICE_PASSWORD"
+          
           # Create user for data-service and auth-service
           mc admin user add myminio "$DATA_SERVICE_USER" "$DATA_SERVICE_PASSWORD" || echo "User already exists"
 
