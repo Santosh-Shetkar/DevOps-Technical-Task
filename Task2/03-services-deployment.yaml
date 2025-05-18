@@ -94,7 +94,7 @@ spec:
         - name: HTTPBIN_STRIP_HEADERS
           value: "Authorization,Cookie,X-API-Key"  # Headers to strip from logs
         command: ["/bin/sh", "-c"]
-        arguments:
+        args:
         - |
           # Override the entrypoint to route logs through a filter
           exec gunicorn -b 0.0.0.0:80 httpbin:app 2>&1 | grep -v "Authorization\|Bearer\|api-key\|password\|secret"
