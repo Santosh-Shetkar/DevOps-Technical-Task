@@ -53,7 +53,6 @@ Includes:
 
 ![main](images/2.png)
 
-
 ### 2. Create ServiceAccounts
 
 ```bash
@@ -97,7 +96,6 @@ kubectl apply -f 05-access-test-jobs.yaml
 ```
 Tests:
 Two Batch Jobs in app-system to verify credentials:
-
   - test-data-service-access: should succeed uploading to app-data
   - test-auth-service-access: should fail listing (access denied)
 ![main](images/10.png)
@@ -124,27 +122,11 @@ Check bucket, users and policies
 ![main](images/4.png)
 ![main](images/5.png)
 
-
 ### 8 Deploy monitoring and Create dashboards
 
 #### Architecture Overview
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Applications  │    │   Prometheus    │    │    Grafana      │
-│                 │────│                 │────│                 │
-│ • data-service  │    │ • Metrics       │    │ • Dashboards    │
-│ • auth-service  │    │ • Alerting      │    │ • Visualizations│
-│ • gateway       │    │ • Storage       │    │ • Users         │
-│ • minio         │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-        │                        │                        │
-        └────────────────────────┼────────────────────────┘
-                                │
-                    ┌─────────────────┐
-                    │ ServiceMonitors │
-                    │                 │
-                    │ • Auto-discovery│
-                    │ • Target config │
-                    └─────────────────┘
+![main](images/1.png)
+
 
 Note: Follow monitoring.sh file to deploy monitoring
 
@@ -182,6 +164,9 @@ Method 1: Using Grafana UI
 4. Customize: Set axes, colors, thresholds, legends
 5. Save: Click "Apply" then save dashboard
 
+![main](images/12.png)
+![main](images/13.png)
+![main](images/14.png)
 
 ![main](images/12.png)
 ![main](images/13.png)
