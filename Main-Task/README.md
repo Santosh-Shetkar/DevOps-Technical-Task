@@ -79,7 +79,6 @@ Includes:
 ![main](images/8.png)
 ![main](images/9.png)
 
-
 ### 4. Configure MinIO Policies & Bucket
 
 ```bash
@@ -100,6 +99,7 @@ Two Batch Jobs in app-system to verify credentials:
   - test-data-service-access: should succeed uploading to app-data
   - test-auth-service-access: should fail listing (access denied)
 ![main](images/10.png)
+
 ### 6. Apply Network Policies
 
 Defines NetworkPolicies to restrict traffic:
@@ -168,4 +168,7 @@ Method 1: Using Grafana UI
 ![main](images/13.png)
 ![main](images/14.png)
 
+![main](images/12.png)
+![main](images/13.png)
+![main](images/14.png)
 ### Link to the Loom video for this task: 
