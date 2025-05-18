@@ -19,7 +19,7 @@ This project simulates AWS IAM-style access control within a Kubernetes environm
 ## Project File structure
 ```test
 ├── 01-minio-deployment.yaml
-├── 02-service-accounts.yaml
+├── 02-secrets.yaml
 ├── 03-services-deployment.yaml
 ├── 04-minio-setup-job.yaml
 ├── 05-access-test-jobs.yaml
