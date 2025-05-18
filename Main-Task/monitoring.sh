@@ -1,3 +1,21 @@
+#Monitoring
+# Metric Collection
+# Node Exporter: Deployed on each node to collect hardware and OS metrics.
+
+# Kube-state-metrics: Provides detailed information about the state of Kubernetes objects.
+
+# Prometheus
+# Prometheus Server: Deployed as a pod within the Kubernetes cluster.
+
+# Metrics Pulling: Prometheus pulls metrics from the Node Exporter and Kube-state-metrics.
+
+# Persistent Storage: Metrics are stored in a Persistent Volume (PVC) to ensure data durability and persistence.
+
+# Grafana
+# Dashboarding: Grafana is used to create, manage, and visualize dashboards.
+
+# PromQL: Utilizes Prometheus Query Language (PromQL) to query and retrieve metrics from Prometheus.
+
 #Step 1: Install Prometheus & Grafana using Helm
 
 # Add the Prometheus community Helm repository
@@ -29,6 +47,8 @@ kubectl port-forward --namespace monitoring svc/monitoring-grafana 3000:80 --add
 # Password:
 
 #Step 3: Configure ServiceMonitor for Applications
+#A ServiceMonitor is a Custom Resource Definition (CRD) used by the Prometheus Operator to automatically discover and 
+#scrape metrics from services running in a Kubernetes cluster. It tells Prometheus which endpoints to scrape for metrics.
 
 kubectl apply -f data-service-servicemonitor.yaml
 kubectl apply -f auth-service-servicemonitor.yaml

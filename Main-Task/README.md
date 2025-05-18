@@ -19,7 +19,7 @@ This project simulates AWS IAM-style access control within a Kubernetes environm
 ## Project File structure
 ```test
 ├── 01-minio-deployment.yaml
-├── 02-service-accounts.yaml
+├── 02-secrets.yaml
 ├── 03-services-deployment.yaml
 ├── 04-minio-setup-job.yaml
 ├── 05-access-test-jobs.yaml
@@ -171,4 +171,6 @@ Method 1: Using Grafana UI
 ![main](images/12.png)
 ![main](images/13.png)
 ![main](images/14.png)
+
 ### Link to the Loom video for this task: 
+https://www.loom.com/share/8fc82fe98bf347d5a9263be9d7ac8e7c?sid=ee03f1e1-d439-415a-84c5-3185f4b5de91
