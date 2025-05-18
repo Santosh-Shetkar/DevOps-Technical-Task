@@ -51,6 +51,8 @@ Includes:
 - Deploys a single‐node MinIO server with console and API ports
 - Exposes API (port 9000) and Console (port 9001)
 
+![main](images/2.png)
+
 ### 2. Create ServiceAccounts
 
 ```bash
@@ -72,6 +74,11 @@ Includes:
 - Configures each pod with MINIO_ACCESS_KEY, MINIO_SECRET_KEY, and MINIO_ENDPOINT
 - Adds liveness/readiness probes and resource requests/limits
 - Deploys a simple gateway service and an Ingress to front the gateway
+![main](images/6.png)
+![main](images/7.png)
+![main](images/8.png)
+![main](images/9.png)
+
 
 ### 4. Configure MinIO Policies & Bucket
 
@@ -90,10 +97,9 @@ kubectl apply -f 05-access-test-jobs.yaml
 ```
 Tests:
 Two Batch Jobs in app-system to verify credentials:
-
   - test-data-service-access: should succeed uploading to app-data
   - test-auth-service-access: should fail listing (access denied)
-
+![main](images/10.png)
 ### 6. Apply Network Policies
 
 Defines NetworkPolicies to restrict traffic:
@@ -101,6 +107,7 @@ Defines NetworkPolicies to restrict traffic:
   - Deny all ingress to MinIO by default
   - Allow only data-service pods to reach MinIO API/console
   - Restrict auth-service egress to only data-service and DNS
+![main](images/11.png)
 
 ### 7. Access the minio dashboard
 
@@ -111,11 +118,15 @@ kubectl port-forward svc/minio -n storage-system 9001:9001 --address 0.0.0.0
 ```
 
 Check bucket, users and policies
+![main](images/3.png)
+![main](images/4.png)
+![main](images/5.png)
 
 ### 8 Deploy monitoring and Create dashboards
 
 #### Architecture Overview
-<pre> ``` +------------------+ +------------------+ +------------------+ | Applications | | Prometheus | | Grafana | |------------------| |------------------| |------------------| | • data-service | | • Metrics | | • Dashboards | | • auth-service | | • Alerting | | • Visualizations | | • gateway | | • Storage | | • Users | | • minio | | | | | +------------------+ +------------------+ +------------------+ | | | +----------+-----------+-----------+----------+ | +------------------------+ | ServiceMonitors | |------------------------| | • Auto-discovery | | • Target config | +------------------------+ ``` </pre>
+![main](images/1.png)
+
 
 Note: Follow monitoring.sh file to deploy monitoring
 
@@ -153,5 +164,8 @@ Method 1: Using Grafana UI
 4. Customize: Set axes, colors, thresholds, legends
 5. Save: Click "Apply" then save dashboard
 
+![main](images/12.png)
+![main](images/13.png)
+![main](images/14.png)
 
 ### Link to the Loom video for this task: 
