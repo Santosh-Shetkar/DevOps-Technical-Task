@@ -112,5 +112,7 @@ kubectl port-forward svc/minio -n storage-system 9001:9001 --address 0.0.0.0
 
 Check bucket, users and policies
 
+### 8 Deploy monitoring and Create dashboards
+
 
 ### Link to the Loom video for this task: 
