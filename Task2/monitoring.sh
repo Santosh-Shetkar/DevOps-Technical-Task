@@ -1,107 +1,57 @@
-#!/bin/bash
-# Install Prometheus and Grafana using Helm
+#Step 1: Install Prometheus & Grafana using Helm
 
 # Add the Prometheus community Helm repository
-echo "Adding Prometheus community Helm repository..."
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
 # Update Helm repositories
-echo "Updating Helm repositories..."
 helm repo update
 
-# Create monitoring namespace
-echo "Creating monitoring namespace..."
-kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
+# Install the kube-prometheus-stack (includes Prometheus, Grafana, and Alertmanager)
+helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
 
-# Create values file for customization
-cat <<EOF > prometheus-values.yaml
-# Custom values for kube-prometheus-stack
-grafana:
-  adminPassword: admin123  # Change this in production
-  dashboardProviders:
-    dashboardproviders.yaml:
-      apiVersion: 1
-      providers:
-      - name: 'default'
-        orgId: 1
-        folder: ''
-        type: file
-        disableDeletion: false
-        editable: true
-        options:
-          path: /var/lib/grafana/dashboards/default
-  dashboards:
-    default:
-      k8s-cluster-monitoring:
-        gnetId: 11074
-        revision: 1
-        datasource: Prometheus
-  # Define resource limits for Grafana
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
+# Wait for all pods to be ready
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=prometheus --namespace monitoring --timeout=300s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=grafana --namespace monitoring --timeout=300s
 
-prometheus:
-  prometheusSpec:
-    # Define resource limits for Prometheus
-    resources:
-      limits:
-        cpu: 500m
-        memory: 1Gi
-      requests:
-        cpu: 200m
-        memory: 512Mi
-    serviceMonitorSelector: {}
-    serviceMonitorNamespaceSelector: {}
-    serviceMonitorSelectorNilUsesHelmValues: false
-    ruleSelectorNilUsesHelmValues: false
-    # Add retention configuration
-    retention: 7d
-    retentionSize: "10GB"
 
-alertmanager:
-  config:
-    global:
-      resolve_timeout: 5m
-    route:
-      group_by: ['job', 'alertname', 'severity']
-      group_wait: 30s
-      group_interval: 5m
-      repeat_interval: 12h
-      receiver: 'null'
-      routes:
-      - match:
-          alertname: Watchdog
-        receiver: 'null'
-      - match:
-          severity: critical
-        receiver: 'email-notifications'
-    receivers:
-    - name: 'null'
-    - name: 'email-notifications'
-      email_configs:
-      - to: 'alerts@example.com'  # Replace with your email
-        from: 'prometheus@example.com'  # Replace with sender email
-        smarthost: 'smtp.example.com:587'  # Replace with your SMTP server
-        auth_username: 'user'  # Replace with SMTP username
-        auth_password: 'password'  # Replace with SMTP password
-    templates:
-    - '/etc/alertmanager/config/*.tmpl'
-EOF
+#Verify Installation
 
-# Install kube-prometheus-stack with custom values
-echo "Installing kube-prometheus-stack with custom values..."
-helm install monitoring prometheus-community/kube-prometheus-stack \
-  --namespace monitoring \
-  --values prometheus-values.yaml
+kubectl get pods -n monitoring
 
-echo "Waiting for deployment to complete..."
-kubectl -n monitoring wait --for=condition=available --timeout=300s deployment/monitoring-grafana
+#Step 2: Access Grafana Dashboard
 
-echo "Prometheus & Grafana installation complete!"
-echo "Access Grafana at: http://localhost:3000 (after port-forwarding)"
-echo "To port forward: kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80"
+kubectl get secret --namespace monitoring monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+kubectl port-forward --namespace monitoring svc/monitoring-grafana 3000:80 --address 0.0.0.0
+
+# Access Grafana at: http://localhost:3000
+# Username: admin
+# Password:
+
+#Step 3: Configure ServiceMonitor for Applications
+
+kubectl apply -f data-service-servicemonitor.yaml
+kubectl apply -f auth-service-servicemonitor.yaml
+kubectl apply -f gateway-servicemonitor.yaml
+kubectl apply -f minio-servicemonitor.yaml
+
+#Step 5: Custom Grafana Dashboard Configuration
+Create a custom dashboard with the following JSON configuration. Import this into Grafana:
+
+Go to Grafana UI (http://localhost:3000)
+Click on "+" → "Import"
+Paste the JSON configuration below
+Click "Load" and then "Import"
+
+#Test Queries in Prometheus
+
+# CPU usage by pod
+rate(container_cpu_usage_seconds_total{namespace="app-system"}[5m])
+
+# Memory usage by pod  
+container_memory_working_set_bytes{namespace="app-system"}
+
+# Pod restart count
+kube_pod_container_status_restarts_total{namespace="app-system"}
+
+#Create a dashboard using these Prom QL queries separately.
