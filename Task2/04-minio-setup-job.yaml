@@ -11,12 +11,21 @@ spec:
         image: minio/mc:latest
         command: ["/bin/sh", "-c"]
         args:
-        - |         
+        - |
+          mc alias set myminio http://minio:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
+         
+          # Wait for MinIO to be ready
+          echo "Waiting for MinIO to be ready..."
+          until mc admin info myminio; do
+            sleep 2
+          done
+                  
           # Create a bucket
           mc mb --ignore-existing myminio/app-data
          
           # Create user for data-service and auth-service
           mc admin user add myminio "$DATA_SERVICE_USER" "$DATA_SERVICE_PASSWORD" || echo "User already exists"
+
           mc admin user add myminio "$AUTH_SERVICE_USER" "$AUTH_SERVICE_PASSWORD" || echo "User already exists"
 
 
