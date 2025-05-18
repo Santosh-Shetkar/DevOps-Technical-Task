@@ -1,0 +1,79 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-to-minio
+  namespace: storage-system
+spec:
+  podSelector:
+    matchLabels:
+      app: minio
+  policyTypes:
+  - Ingress
+  ingress: []  # Empty ingress rules = deny all incoming traffic
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-data-service-to-minio
+  namespace: storage-system
+spec:
+  podSelector:
+    matchLabels:
+      app: minio
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: app-system
+      podSelector:
+        matchLabels:
+          app: data-service
+    ports:
+    - protocol: TCP
+      port: 9000  # MinIO API port
+    - protocol: TCP
+      port: 9001  # MinIO Console port
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: auth-service-network-policy
+  namespace: app-system
+spec:
+  podSelector:
+    matchLabels:
+      app: auth-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector: {}  # Allow ingress from all pods in the same namespace
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: app-system
+  egress:
+  - to:  # Allow egress only to data-service
+    - podSelector:
+        matchLabels:
+          app: data-service
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: app-system
+    ports:
+    - protocol: TCP
+      port: 80
+  - to:  # Allow DNS resolution
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53

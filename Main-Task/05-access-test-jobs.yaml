@@ -1,0 +1,77 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-data-service-access
+  namespace: app-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: test-access
+        image: minio/mc:latest
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          # Configure MinIO client with data-service credentials
+          mc alias set myminio http://minio.storage-system.svc.cluster.local:9000 $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
+          
+          # Try to create a test file
+          echo "test data" > /tmp/testfile.txt
+          
+          # Try to upload the file
+          mc cp /tmp/testfile.txt myminio/app-data/
+          
+          # List objects to verify
+          mc ls myminio/app-data/
+          
+          echo "Test completed"
+        env:
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: data-service-minio-creds
+              key: accesskey
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: data-service-minio-creds
+              key: secretkey
+        - name: MINIO_ENDPOINT
+          value: "http://minio.storage-system:9000"
+      restartPolicy: OnFailure
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-auth-service-access
+  namespace: app-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: test-access
+        image: minio/mc:latest
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          # Try to use the same credentials (this simulates misconfiguration)
+          mc alias set myminio http://minio.storage-system.svc.cluster.local:9000 $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
+          
+          # Try to list objects (this should fail)
+          mc ls myminio/app-data/ || echo "Access denied as expected"
+          
+          echo "Test completed"
+        env:
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auth-service-minio-creds
+              key: accesskey
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auth-service-minio-creds
+              key: secretkey
+        - name: MINIO_ENDPOINT
+          value: "http://minio.storage-system:9000"
+      restartPolicy: OnFailure

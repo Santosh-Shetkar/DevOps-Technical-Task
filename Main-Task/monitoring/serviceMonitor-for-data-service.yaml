@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: data-service-monitor
+  namespace: app-system
+  labels:
+    app: data-service
+spec:
+  selector:
+    matchLabels:
+      app: data-service
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
